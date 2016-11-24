@@ -10,109 +10,130 @@ To really get the hang of them, though, there's really nothing better than doing
 [These practice problems](https://mightybyte.github.io/monad-challenges/) are fantastic.
 In this post, I will assume knowledge of [basic haskell syntax](https://prajitr.github.io/quick-haskell-syntax/).
 
-The two operations that define a monad are `>>=` (pronounced bind) and `return`.
-The hard one is bind.
-For the `Maybe` data structure, which is used to wrap nullable data, bind's type signature is
+For most of the post I will use the `Maybe` datatype, which is just a data type that can also be null. A variable of type `Maybe a` can either be `Just x` where `x :: a` or `Nothing`. 
+
+The painful part of working with data types like this is having to unpack them all the time.
+If you want to chain methods together with a function like `(&)`, it can get really painful:
 
 {% highlight haskell %}
-(>>=) :: Maybe a -> (a -> Maybe b) -> Maybe b
+(&) :: a -> (a -> b) -> b
+x & f = f x
+
+pureFun :: a -> b
+pureFun = -- some piece of business logic
+
+nullableFun :: a -> Maybe b
+nullableFun = -- some piece of business logic that might return "Nothing"
+
+y = Just x &  -- x :: a
+    doSomething &
+    doSomethingElse
+  where
+    doSomething mVal =
+      case mVal of
+          Just val -> Just (pureFun val)  -- pureFun :: a -> b
+          Nothing  -> Nothing
+    doSomethingElse =
+      case mVal of
+          Just val -> nullableFun val  -- nullableFun :: b -> Maybe c
+          Nothing  -> Nothing
 {% endhighlight %}
 
-In a more java-like notation, this is like
-
-{% highlight java %}
-Maybe<B> bind(Maybe<A>, Function<A, Maybe<B>)
-{% endhighlight %}
-
-It takes a nullable object of type A, and a function that maps objects of type A to nullable objects of type B, and returns a nullable object of type B.
-
-The reason bind is so convenient is that it's easier to write functions that take an `a`, than it is to write functions that take a `Maybe a`.
-The popular alternative would be to write functions of type
+That's a lot of packing and unpacking.
+That kind of programming isn't just a pain in the butt, it's where I introduce the most common bugs.
+It would be much better if we could just abstract out all the boilerplate packing/unpacking of our data.
+Following the pattern above, it would be something like this:
 
 {% highlight haskell %}
-Maybe a -> Maybe b
+maybeApply :: Maybe a -> (a -> ???) -> Maybe b
+maybeApply packedValue f =
+  case packedValue of
+    Just unpackedValue -> ???
+    Nothing            -> Nothing
 {% endhighlight %}
 
-To do this, you have to handle both cases: a normal value and a null value.
-This is a pain in the ass and I don't enjoy it.
-I'm also prone to introducing bugs here.
-It's much easier to just write a function that handles the null value for you once and be done with it.
-It returns null if the input is null, and applies your function to a non-null value otherwise.
-Simple!
-
-Another example might be lists, where turning a list of xs into ys requires writing an error prone, tedious loop.
-Much easier to use a map function!
-
-In the general case, you have some structured data, whether it's `Maybe a`, `List a`, or the variable `f a`, and want to turn them into `Maybe b`, `List b`, or `f b`.
-If there's a canonical way to apply a function of type `a -> b`, then `f` is a Functor.
-Finding this abstraction is a great way to not repeat yourself.
-For Maybe, this is applying the function to the non-null values.
-For List, this is the map function.
-
-Sometimes, however, you might want to turn `m a` into `m b` and have a canonical way apply a function of type `a -> m b`.
-For Maybe, a null should return a null, and a non-null value should be applied to the function.
-For the random number generator monad, it might take a value from one random number generator and use it as a parameter for another random number generator.
-
-These two abstractions, `m a -> (a -> b) -> m b` and `m a -> (a -> m b) -> m b` turn up in all sorts of data structures `m`.
-In both cases, being able to program with the raw `a` instead of having to unpack it in cases or a loop saves a ton of time and effort.
-When you start using these patterns again and again for your data structure, it's time to factor them out, maybe into the Functor or Monad abstractions, unlocking all of the library functions that go along with them.
-
-The other part of a monad that's really simple is the `return` function whose type is `a -> m a`.
-For Maybe, `return x = Just x`.
-For List, `return x = [x]`.
-
-Practical Haskell
------------------
-
-To give an example, Haskell's lambda syntax is useful.
-`\x -> f x` defines a function that takes x and applies f to it.
-Adding 2 to a `Just 1` could be written as `Just 1 >>= (\one -> return (one + 2))` which, without the unnecessary parentheses is `Just 1 >>= \one -> return (one + 2)`.
-The variable `one` has type `Int`, not `Maybe Int`, which is the whole point.
-
-It really starts to pay off in longer programs:
+The `???` pieces depend on exactly what we're doing, but the rest is going to be the same no matter what.
+Looking at the example above, the functions we're applying have two different types:
 
 {% highlight haskell %}
-Just 1 >>= \one ->
-Just 2 >>= \two ->
-aNullableFunction one >>= \x ->
-return (aNonNullableFunction two) >>= \y ->
-return (one * y + two * x)
+pureFun     :: a -> b
+nullableFun :: a -> Maybe b
 {% endhighlight %}
 
-Notice that `>>=` just behaves like an overloaded `=` sign that binds to the variable name on the right side.
-Hence the name "bind".
-
-In Haskell, there's an even more convenient sugar for this.
+Throwing those into our maybeApply would give us two different kinds of functions
 
 {% highlight haskell %}
-do 
-  one <- Just 1
-  two <- Just 2
-  x <- aNullableFunction one
-  y <- return (aNonNullableFunction two)
-  return (one * y + two * x)
+maybeApplyPure :: Maybe a -> (a -> b) -> Maybe b
+maybeApplyPure packedValue pureFun =
+  case packedValue of
+    Just unpackedValue -> Just (pureFun unpackedValue)
+    Nothing            -> Nothing
+
+maybeApplyNullable :: Maybe a -> (a -> Maybe b) -> Maybe b
+maybeApplyNullable packedValue nullableFun =
+  case packedValue of
+    Just unpackedValue -> nullableFun unpackedValue
+    Nothing            -> Nothing
 {% endhighlight %}
 
-It's entirely equivalent.
-Translating do notation back and forth to bind notation is really good for learning.
-`do { x <- mX; ...}` is the same as `mX >>= \x -> ...`.
-If you don't care about the results, `mX; ...` is the same as `mX >>= \_ -> ...`.
-
-Finally, you probably noticed that `y <- return (aNonNullableFunction two)` just wrapped `aNonNullableFunction two` in a monad only to immediately take it back out.
-This is unnecessary, and there's more syntax to use regular variable binding in a do block with plain old `=`:
+The first case handles all functions that are guaranteed to return useful data, and the second handles functions that might return `Nothing`.
+With those in hand, we could rewrite our original code as
 
 {% highlight haskell %}
-do 
-  one <- Just 1
-  two <- Just 2
-  x <- aNullableFunction one
-  let y = aNonNullableFunction two
-  return (one * y + two * x)
+y = Just x `maybeApplyPure`
+    pureFun `maybeApplyNullable`
+    nullableFun
 {% endhighlight %}
 
-That should hopefully provide some motivation around why the bind abstraction is so convenient, and teach you how to translate between it and common Haskell `do` syntax.
-And because it bears repeating, to really grok this stuff, I'm sorry but you have to learn by doing.
-I'm going to plug [these practice problems](https://mightybyte.github.io/monad-challenges/) again because they helped me so much.
-If you really want to learn Haskell more generally, I recommend following the progression outlined [here](https://github.com/bitemyapp/learnhaskell).
-It's worth it.
+The only functions we have to worry about here are the ones that handle actual data.
+We can spend our mental effort (and debugging effort!) on whatever `pureFun` and `nullableFun` happen to be, instead of worrying about the containers over and over.
+It's a much better way to program.
 
+We can generalize this to more generic containers too:
+
+{% highlight haskell %}
+-- These:
+maybeApplyPure         :: Maybe a -> (a -> b)       -> Maybe b
+maybeApplyNullable     :: Maybe a -> (a -> Maybe b) -> Maybe b
+-- are replaced by these:
+containerApplyUnpacked :: f a     -> (a -> b)       -> f b
+containerApplyPacked   :: f a     -> (a -> f b)     -> f b
+{% endhighlight %}
+
+The implementation depends on the datatype `f`, of course, but they tend to be really useful.
+Worry about packing and unpacking your container as rarely as you can.
+The rest of the time, just write code that deals with the data inside.
+In my mind, that's why Monads and functors are so useful.
+The type signatures for the methods that are hardest to think about for a newbie are:
+
+{% highlight haskell %}
+(flip fmap) :: (Functor f) => f a -> (a -> b)   -> f b
+(>>=)       :: (Monad f)   => f a -> (a -> f b) -> f b
+{% endhighlight %}
+
+These are just the `maybeApplyPure`/`containerApplyUnpacked` and `maybeApplyNullable`/`containerAppplyPacked` we derived above. (`fmap` has its arguments reversed).
+
+The other part of a monad is just a really simple function
+
+{% highlight haskell %}
+return :: (Monad m) => x -> m x
+-- Example for maybe
+return :: x -> Maybe x
+return value = Just value
+{% endhighlight %}
+
+`return` is just a "default" way of packing a single piece of data into your data structure.
+
+There's a bit more to it than that, regarding monad laws and functor laws that must be obeyed to really be a monad, but intuitively, monads and functors are just ways of codifying how to deal with data inside a data structure, depending on whether the intermediate code returns data that is itself in a container or not.
+
+Lists, for example, are one of the other most common data structures.
+A functor for a list of type `[a]` would just define a way to apply a function `f` of type `a -> b`, turning it into another list of type `[b]`.
+The most obvious way to do that would be to turn each `a` into a `b` by apply `f` to each one.
+A monad for a list of type `[a]` also turns it into `[b]`, but this time, by applying a function `f` of type `a -> [b]`.
+The most obvious way to do this is to just apply `f` to each element, and concatenate the resulting lists together.
+
+That's the main idea.
+Just like you don't want to deal with the pain of for loops and array index out of bounds errors, you don't want to manually unpack your data every time you use it.
+Some of the most generic functions to use on generic containers are defined by functors and monads.
+By defining functions for generic containers instead of having different ones for Maybe and List, we can build up more powerful tools that apply to most any data structures with canonical ways of unpacking and applying functions.
+In the next posts, I'll get pragmatic and talk about [the syntax that makes them easier to use](http://ian.ai/2016/05/27/monad-cheatsheet.html), and [how to compose these things together](http://ian.ai/2016/06/07/chaining-functors.html)
