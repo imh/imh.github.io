@@ -89,7 +89,7 @@ Who would have thought!?
 At first, I thought I had a bug when I couldn't generate a single AST, but then I realized it just took forever.
 Penalizing samples that overflowed some small depth, it was able to run quickly enough.
 
-# Finally!
+# Finally, results!
 
 It didn't take too horribly long to learn simple functions like `lambda x: True`, `lambda (x1, x2): x1`, or `lambda (x1, x2): (x1 * x1) + x2` or other "programs" of similar complexity, but this is where I realized I was going down the wrong path.
 First of all, it took longer than I'd like to go from most most samples overflowing the maximum tree depth, to most samples being small enough to evaluate.
@@ -114,3 +114,9 @@ This "hack at it until it works" approach helps me think through new problems so
 It strikes me as an easier problem in a larger solution space, so who knows if it'll be easier for a machine to find. ¯\\\_(ツ)\_/¯
 
 But both of those are too much work for a side project, so this is on hold for a while. :(
+
+# What I learned
+
+My takeaway from this whole project was that, when searching through huge/infinite spaces, an approach that samples individual points redundantly is a waste.
+Maximizing likelihood that good solutions are found doesn't require that we start the search all over for every parameter update.
+The focus shouldn't be on maximizing the likelihood of those points given that they are found, the focus should be on finding them in the first place.
