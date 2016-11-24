@@ -83,6 +83,7 @@ Applying reinforcement learning, we can find the parameters that make the true A
 
 If we sampled enough ASTs, we ought to be able to find the right one, and increase its probability, or at least increase the probabilities of better approximations to the true one.
 That's a rough description, and the actual code is [here](https://github.com/imh/func_learn/tree/master/src/mono).
+The lambda calculus I built for it to learn basically followed the one laid out in the [Type Systems section of Stephen Diehl's Write You a Haskell](http://dev.stephendiehl.com/fun/004_type_systems.html#simply-typed-lambda-calculus), plus a few more primitives.
 
 It turns out that in the space of all ASTs in a simple language, most of them are huge, in the same way that most positive integers are over a million.
 Who would have thought!?
