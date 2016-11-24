@@ -21,7 +21,7 @@ I set out to test this with a series of toy problems.
 
 The first test was to learn whether a bunch of numbers were summed or multiplied.
 Given a list of pairs $$(x_{1i}, x_{2i})$$ and associated $$y_i = x_{1i} \oplus x_{2i}$$ where $$\oplus$$ is either addition or multiplication, I wanted to see whether a simple policy gradient algorithm could learn which gives smaller errors?
-I did this with policies that chose addition with probability $$\sigma(\theta)$$ and multiplication otherwise, searching for a policy that maximized the negative error.
+I did this with policies that chose addition with probability $$sigmoid(\theta)$$ and multiplication otherwise, searching for a policy that minimized the error.
 
 The most basic way to do policy gradient is to notice that $$\nabla_\theta \mathbb{E}_X[f(x)] = \mathbb{E}_X[f(x) \nabla_\theta \textrm{ln}p(x)]$$.
 This does ok, but the finite sample analogue is kinda crappy.
