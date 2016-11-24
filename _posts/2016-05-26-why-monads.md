@@ -136,4 +136,4 @@ That's the main idea.
 Just like you don't want to deal with the pain of for loops and array index out of bounds errors, you don't want to manually unpack your data every time you use it.
 Some of the most generic functions to use on generic containers are defined by functors and monads.
 By defining functions for generic containers instead of having different ones for Maybe and List, we can build up more powerful tools that apply to most any data structures with canonical ways of unpacking and applying functions.
-In the next posts, I'll get pragmatic and talk about [the syntax that makes them easier to use](http://ian.ai/2016/05/27/monad-cheatsheet.html), and [how to compose these things together](http://ian.ai/2016/06/07/chaining-functors.html)
+In the next posts, I'll get pragmatic and talk about [the syntax that makes them easier to use](http://ian.ai/2016/05/27/monad-cheatsheet.html), and [how to compose these things together](http://ian.ai/2016/06/07/chaining-functors.html).

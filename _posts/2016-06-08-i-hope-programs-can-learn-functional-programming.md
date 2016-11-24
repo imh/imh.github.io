@@ -45,7 +45,3 @@ The first part is deciding what building blocks allow lots of interesting progra
 The next piece is to represent the AST and function composition in a learnable form.
 After that, I'd like to see how to extend beyond simple languages into more expressive ones with user defined data types and fancier type systems until I'm teaching a machine to program like I do.
 I'm going to try to document the development as I go.
-
------------
-
-***edit:*** *I put a bit of work into it, but never got far enough to really be worth writing up. The short story is [here](http://ian.ai/2016/11/22/teaching-programs-to-program-is-hard.html).*
