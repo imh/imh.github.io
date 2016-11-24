@@ -102,7 +102,8 @@ Finally, with finite samples, it was really easy to get stuck in local minima, n
 The simplest change would be to stop sampling from the possible trees and instead turn it into a search problem where we only see each possible tree at most once per gradient step.
 Importance sampling (or something like 12.5 of [Koller and Friedman](http://pgm.stanford.edu/)) might not be the right idea, but they seem like the right flavor.
 I don't actually *need* an unbiased estimate of the gradient.
-I need it with respect to the ASTs that are small enough to be worth considering, plus a mechanism that searches deeper (in the tree of possible ASTs) in a more intelligent direction than breadth first search.
+All I really need is a way to intelligently decide where to search next in the tree of all possible ASTs.
+Gradients of stochastic policies seem like total overkill in retrospect.
 
 The problem there is that I'd have to write this whole thing as an infinite tree of trees to explore, and that just seem like a pain in the butt.
 
