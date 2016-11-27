@@ -138,7 +138,7 @@ Do it too much and it becomes a game, and you write blog posts like this one.
 
 For this particular use case, I found the `ast` library.
 It gives you tools to work with python code, modifying and traversing the AST as you see fit.
-The [official docs](https://docs.python.org/2/library/ast.html) aren't that great for jumping in, but there's [another set of docs called Green Tree Snakes](https://greentreesnakes.readthedocs.io/en/latest/) that helped me get started.[^1]
+The [official docs](https://docs.python.org/2/library/ast.html) aren't that great for jumping in, but there's [another set of docs called Green Tree Snakes](https://greentreesnakes.readthedocs.io/en/latest/) that helped me get started.
 
 ### Parsing
 
@@ -184,7 +184,7 @@ Its bulky, but we can work with it.
 # Rewriting the AST
 
 The goal here is to find any `With` nodes and rewrite their contents.
-`ast` makes this *super* easy with `ast.NodeTransformer`.[^2]
+`ast` makes this *super* easy with `ast.NodeTransformer`.
 If you inherit from `NodeTransformer`, you can override the `visit_Foo` method to do something special to the `Foo` nodes.
 In this case, we want to override the with block:
 
@@ -352,7 +352,3 @@ def sepby1(p, sep):
 {% endhighlight %}
 
 Of course, this kind of recursive programming will exceed your max recursion depth pretty quickly, but it was great to see that, at least in principle, it's not too hard to make it easy.
-
-[^1]: Green Tree Snakes also has [a nice pretty printer](https://bitbucket.org/takluyver/greentreesnakes/src/default/astpp.py?fileviewer=file-view-default) for the ast objects.
-
-[^2]: There's also a `ast.NodeVisitor` or `ast.walk` to for just looking at the tree.
