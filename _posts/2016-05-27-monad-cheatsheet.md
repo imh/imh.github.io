@@ -28,7 +28,7 @@ For `Maybe`, this is just programming with the values if they aren't null, and f
 You didn't have to deal with any of the bug-prone headache of unpacking or repacking `x` and `y`, but now you get to use them the easy way.
 
 That's a bit abstract, so let's make it concrete with an example.
-To show how to use this lambda style syntax to build real programs, we just chain them together without having to deal with any of `case` statements to handle potential `Nothing`s:
+To show how to use this lambda style syntax to build real programs, we just chain them together without having to deal with any `case` statements to handle potential `Nothing`s:
 
 {% highlight haskell %}
 justThree =
@@ -57,8 +57,8 @@ In Haskell, there's an even more convenient syntax for this kind of binding:
 {% highlight haskell %}
 These are equivalent:
 y = (Just 1      >>= \one ->
-     Just 2      >>= \two
-     nullableFun >>= one
+     Just 2      >>= \two ->
+     nullableFun one >>= \x ->
      let y = nonNullableFun two
       in Just (one * y + two * x))
 

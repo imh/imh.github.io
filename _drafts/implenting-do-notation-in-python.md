@@ -5,7 +5,7 @@ title: "Implementing Do Notation in Python"
 
 ## a.k.a. Evil hacks in python for fun ~~and profit~~
 
-**disclaimer:** *This is all a really bad idea, but it was pretty fun to do. Hopefully I can teach you all how to do equally horrible-yet-fun things. You should not actually use the decorator I built.*
+**disclaimer:** *This is all a really bad idea, but it was pretty fun to do. Hopefully I can teach people how to do equally horrible-yet-fun things. You should not actually use the decorator I built.*
 
 Monads are a really useful as an abstraction, and a nice clean syntax goes a long way in making them pain-free to use.
 In Haskell, that's `do` notation.

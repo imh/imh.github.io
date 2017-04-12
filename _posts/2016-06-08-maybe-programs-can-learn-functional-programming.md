@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "I'd Bet Programs Can Learn Functional Programming"
+title: "Maybe Programs Can Learn Functional Programming"
 ---
 
 I've been thinking for a while now about how to teach a machine to program.
