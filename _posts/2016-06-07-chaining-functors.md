@@ -44,24 +44,26 @@ x <$$> f = fmap f x -- just a flipped fmap to more closely match >>=
 
 funApply :: f a -> f b -> (a -> b -> c) -> f c
 funApply fX fY fun =
-  fX <$$> \x ->
-  whatever -- whatever has to have type c, but we still haven't taken the b
-           -- out of f b in fY! Oh no!
+  fX <$$> \x ->  -- fX :: f a, and so x :: a from the definition of <$$>
+  whatever       -- what's the type of whatever?
 {% endhighlight %}
 
 We run into a problem.
+From the definition of `<$$>`, we see that if `whatever :: d`, then the final result of `(fX <$$> \x -> whatever) :: f d`.
+From our funApply type signature, we want that to be `f c`, so we must have `whatever :: c`.
+The problem is that we don't have a `y :: b` from the `fY :: f b` in scope yet. Oh no!
 
 With monads, we get `>>= :: m a -> (a -> m b) -> m b`. `whatever` has type `m b` in `mX >>= \x -> whatever`, so we can do more monadic unpacking inside it to unpack more things, like `whatever = mY >>= \y -> stuff`, where we still end up with `stuff :: m b`.
 
 Because fmap has to take a pure function `(a -> b)`, `fX <$$> \x -> fWhatever` requires that `fWhatever` has type `b`. We aren't in a packed datastructure anymore and are limited to a very particular kind of computation.
 We can't take `f b` out too.
 
-
 So what can we do? Let's follow the types out and see what we need. For a bivariate function `fun :: a -> b -> c` we could try the following:
 
 {% highlight haskell %}
 (<$$>) :: f a -> (a -> b) -> f b
 x <$$> f = fmap f x -- just a flipped fmap to more closely match >>=
+
 -- We know how to unpack one value fX, so let's just do that
 funApply :: f a -> (a -> b -> c) -> f (b -> c)
 funApply fX fun =
@@ -70,14 +72,18 @@ funApply fX fun =
 -- this is just "fmap fun fX"
 {% endhighlight %}
 
-If we defined how to apply functions `f (b -> c)` to `f b`, then we could apply this weird half-applied, sorta packaged up function (or package full of functions).
+Are we any closer? Now we have a `f (b -> c)` in we can use, but there's no clear way to apply that to a `f b`.
+
+To make it semi-concrete again, let's go back to `Maybe`. A "function" of type `Maybe (b -> c)` is either just a function `Just fun` or `Nothing`. It seems pretty clear how we ought to apply `Just fun` to `Just x` or `Nothing`, and applying `Nothing` should just be `Nothing`, so maybe `Maybe (b -> c)` isn't such a crazy kind of function to apply.
+
+More generally, if we define how to apply functions `f (b -> c)` to `f b`, then we could apply this weird half-applied, sorta packaged up function (or package full of functions) to our data structures.
 Turns out that defining that packaged function application operation on a functor defines an applicative functor (just called Applicative).
 The operation is denoted `<*>`: `(<*>) :: Applicative f => f (a -> b) -> f a -> f b`.
 
 With that, we can finally define this kind of complex chaining for pure functions to use `a -> b -> c` on `f a` and `f b`.
 `fmap fun fX` gives us a `f (b -> c)` and `<*>` lets us apply it to `fY :: f b`.
 It's just `(fmap fun fX) <*> fY`.
-Applicative actually defines an infix `fmap` written `<$>`, which makes it even easier to write: `fun <$> fX <*> fY`.
+Applicative actually defines an infix `fmap` written `<$>`, which makes it even easier to write: `(fmap fun fX) <*> fY == (fun <$> fX) <*> fY == fun <$> fX <*> fY`.
 Because haskell is all about partially applying functions, it's just as simple to keep applying this to more and more arguments:
 
 {% highlight haskell %}
@@ -103,7 +109,7 @@ I'm not 100% sure on the syntax, but I think the translation is as follows:
 do
   x <- fX
   y <- fY
-  pure (f x y)
+  pure (f x y) -- pure is just like Monad's return.
 
 -- is the same as
 f <$> fX <*> fY
