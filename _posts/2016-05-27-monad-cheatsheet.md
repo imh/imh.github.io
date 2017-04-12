@@ -3,8 +3,8 @@ layout: post
 title: "Monad Cheatsheet"
 ---
 
-I had a [post](http://ian.ai/2016/05/26/why-monads.html) recently about why monads are such a useful abstraction and incidentally introduced Functors too.
-I want to reiterate that this is the kind of thing where you have to learn by doing. [These practice problems](https://mightybyte.github.io/monad-challenges/) are what helped me understand this stuff.
+I had a [post](http://imh.github.io/2016/05/26/why-monads.html) recently about why monads are such a useful abstraction and incidentally introduced Functors too.
+I want to reiterate that this is the kind of thing where you have to learn by doing. [These practice problems](https://mightybyte.github.io/monad-challenges/) are what helped me undertand this stuff.
 But understanding how they work on simple data types can still leave a disconnect to using them in practice.
 When I finally began to understand `>>=`, and then saw all the do-notation in the wild, it was confusing, so I thought I'd provide a cheatsheet.
 
@@ -117,5 +117,5 @@ do
 {% endhighlight %}
 
 This kind of composition is really useful and important.
-[The next post](http://ian.ai/2016/06/07/chaining-functors.html) will be about combining Functors together in a similar way.
+[The next post](http://imh.github.io/2016/06/07/chaining-functors.html) will be about combining Functors together in a similar way.
 

@@ -3,7 +3,7 @@ layout: post
 title: "Teaching Programs to Program is Hard"
 ---
 
-Towards the beginning of the summer, [I wrote up a post](http://ian.ai/2016/06/08/i-hope-programs-can-learn-functional-programming.html) on how I think we could teach programs to program.
+Towards the beginning of the summer, [I wrote up a post](http://imh.github.io/2016/06/08/i-hope-programs-can-learn-functional-programming.html) on how I think we could teach programs to program.
 The gist is that there's a small-ish well typed program space worth exploring in pure functional programming.
 Pure strongly typed FP can be really restrictive in what programs it allows, which means a machine has fewer bad programs it has to try out.
 

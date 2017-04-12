@@ -3,9 +3,9 @@ layout: post
 title: "Chaining Functors"
 ---
 
-[A couple posts ago](http://ian.ai/2016/05/26/why-monads.html), I made a big deal about how Monads and Functors are convenient because they allow us to program with functions that take `a -> whatever` instead of `m a -> whatever`, not having to unpack data for ourselves, but still overall turn `m a` in to `m b`.
+[A couple posts ago](http://imh.github.io/2016/05/26/why-monads.html), I made a big deal about how Monads and Functors are convenient because they allow us to program with functions that take `a -> whatever` instead of `m a -> whatever`, not having to unpack data for ourselves, but still overall turn `m a` in to `m b`.
 I  tried to show that Functors and Monads both fall out of this goal of working with the data inside a data structure without having to manually unpack and pack it over and over again.
-In [my last post](http://ian.ai/2016/05/27/monad-cheatsheet.html), I showed how to use this to compose monads, combining them together to make complex programs in a convenient way.
+In [my last post](http://imh.github.io/2016/05/27/monad-cheatsheet.html), I showed how to use this to compose monads, combining them together to make complex programs in a convenient way.
 What about functors?
 If they are just as convenient as monads, can we chain functorial computations together to write complex programs too?
 The answer is yes and no.
