@@ -11,3 +11,5 @@ The blog is mostly for me to practice writing more.
 I'm nervous/embarrased about keeping anything public facing, but it's good motivation and  we'll see how it goes.
 Hopefully I'll eventually have things actually worth reading!
 
+My CV is [here](/assets/cv.pdf).
+
