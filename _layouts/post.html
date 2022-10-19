@@ -9,7 +9,18 @@ layout: default
   </header>
 
   <div class="post-content" itemprop="articleBody">
-    {{ content }}
+    {% capture words %}
+    {{ content | number_of_words | minus: 180 }}
+    {% endcapture %}
+    {% unless words contains '-' %}
+    <div class="time-to-read">
+      {{ words | plus: 180 | divided_by: 180 | append: ' minutes to read' }}
+      <hr>
+    </div>
+
+    {% endunless %}
+    {{ content | toc }}
+<!--    {{ content }}-->
   </div>
 
 </article>

@@ -25,6 +25,13 @@ body {
     font-kerning: normal;
 }
 
+@media (prefers-color-scheme: dark) {
+    body {
+        //background: rgb(43,43,43);
+        background: rgb(32,33,36);
+        color: rgb(189, 192, 195);
+    }
+}
 
 
 /**
