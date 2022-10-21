@@ -53,6 +53,10 @@ img {
     max-width: 100%;
     vertical-align: middle;
 }
+video {
+    max-width: 100%;
+    vertical-align: middle;
+}
 
 
 
@@ -154,6 +158,19 @@ pre {
         border: 0;
         padding-right: 0;
         padding-left: 0;
+    }
+}
+
+/**
+ * Dark mode code formatting
+ */
+@media (prefers-color-scheme: dark) {
+    pre,
+    code {
+        font-size: 15px;
+        border: 1px solid $grey-color-dark;
+        border-radius: 3px;
+        background-color: rgb(32, 36, 32);
     }
 }
 

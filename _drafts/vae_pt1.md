@@ -64,7 +64,7 @@ Then we have to build a model of $ p(x, z)$, which we'll factor as $ p(x \vert z
 
 The simplest candidates are $ p(z) = \text{uniform} $ and $ p(x \vert z) = \text{gaussian} $.
 
-![Fixed distribution (x,z) ~ q(x, z), learned distribution p(x|z)]({{ site.url }}/assets/vae/1/fixed_qxz_learned_pxz.jpeg)
+![Fixed distribution (x,z) ~ q(x, z), learned distribution p(x\|z)]({{ site.url }}/assets/vae/1/fixed_qxz_learned_pxz.jpeg)
 
 This is a much better model. **We added a latent variable $z$ to represent the structure of the data, and now
 we can get away with a very simple model mapping latent $z$ back to observed $x$.**
