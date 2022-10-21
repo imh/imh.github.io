@@ -29,18 +29,19 @@ model of it.
 
 As a toy model, let's say we have data distributed like this:
 
-(graph here)
+{: .center}
+![Fixed distrubition x ~ q(x)]({{ site.url }}/assets/vae/1/qx.jpeg)
 
 Variational inference is the process finding the best fitting model $ p(x) $ to some observed $ q(x) $, when the class of
 model distributions doesn't necessarily include the true distribution $ q(x) $.
 
 We do this by minimizing the KL-divergence between the true distribution $ q(x) $ and the model distribution $ p(x) $
 
-$$ p(x) = \underset{p}{\text{argmin}} D_{KL}(q(x) || p(x)) $$
+$$ p(x) = \underset{p}{\text{argmin}} D_{KL}(q(x) \Vert p(x)) $$
 
 In the toy model, the true distribution clearly isn't gaussian, but we can find the best fitting gaussian:
 
-(graph here)
+![Fixed distribution x ~ q(x) with estimated x ~ p(x)]({{ site.url }}/assets/vae/1/qx_learned_px.jpeg)
 
 It's a terrible approximation. We're dramatically overestimating the support of the distribution and it's obvious that
 there's structure to be exploited.
@@ -49,9 +50,12 @@ there's structure to be exploited.
 
 A simple candidate to structure our model is two split it into two groups:
 
-(graph here)
+![Fixed marginal distributions x ~ q(x) and z ~ q(z)]({{ site.url }}/assets/vae/1/fixed_qxz_unknown_joint.jpeg)
 
 Denoting the groups as $ z_1 $ and $ z_2 $, we're now trying to see which $ x $ and $ z $ go together.
+Ideally we learn a model that connects $ x $ and $ z $ like this, where the dashed lines denote $q(z_j \vert x_i)=1$:
+
+![Fixed distribution (x,z) ~ q(x, z)]({{ site.url }}/assets/vae/1/fixed_qxz.jpeg)
 
 Let's assume we have $ q(z \vert x)$ figured out already (we'll come back to this), grouping the $x$ variables in the
 obvious way.
@@ -60,7 +64,7 @@ Then we have to build a model of $ p(x, z)$, which we'll factor as $ p(x \vert z
 
 The simplest candidates are $ p(z) = \text{uniform} $ and $ p(x \vert z) = \text{gaussian} $.
 
-(graph here)
+![Fixed distribution (x,z) ~ q(x, z), learned distribution p(x|z)]({{ site.url }}/assets/vae/1/fixed_qxz_learned_pxz.jpeg)
 
 This is a much better model. **We added a latent variable $z$ to represent the structure of the data, and now
 we can get away with a very simple model mapping latent $z$ back to observed $x$.**
@@ -91,37 +95,45 @@ we'll do a decent job fitting a distribution over the original space $x$.
 
 ## The evidence lower bound (standard version)
 
-Rewriting $q(x, z)$ as $q(z\vert x)q(x)$ and $p(x, z)$ as $p(x\vert z)p(z)$ we can write the ELBO as:
+Rewriting $q(x, z)$ as $q(z \vert x)q(x)$ and $p(x, z)$ as $p(x \vert z)p(z)$ we can write the ELBO as:
 
 $$\begin{align}
 & D_{KL}(q(x, z) \Vert p(x, z)) \\
-&= D_{KL}[q(z|x) q(x) \Vert p(x, z) ) \\
-&= \mathbb{E}_q \left[ \ln \frac{q(z|x) q(x)}{p(x, z)} \right] \\
-&= \mathbb{E}_q \left[ \ln \frac{q(z|x)}{p(x, z)} \right] + H(q_x) \\
-&= \mathbb{E}_q \left[ \ln \frac{q(z|x)}{p(x|z)p(z)} \right] + H(q_x) \\
-&= \mathbb{E}_q \left[ \ln \frac{q(z|x)}{p(z)} \right] - \mathbb{E}_q \left[ \ln p(x|z) \right] + H(q_x) \\
+&= D_{KL}[q(z \vert x) q(x) \Vert p(x, z) ) \\
+&= \mathbb{E}_q \left[ \ln \frac{q(z \vert x) q(x)}{p(x, z)} \right] \\
+&= \mathbb{E}_q \left[ \ln \frac{q(z \vert x)}{p(x, z)} \right] + H(q_x) \\
+&= \mathbb{E}_q \left[ \ln \frac{q(z \vert x)}{p(x \vert z)p(z)} \right] + H(q_x) \\
+&= \mathbb{E}_q \left[ \ln \frac{q(z \vert x)}{p(z)} \right] - \mathbb{E}_q \left[ \ln p(x \vert z) \right] + H(q_x) \\
 \end{align}$$
 
 The final term is just the entropy of our data, which is independent of our model $p$, so we can ignore it:
 
-$$ ELBO =  \mathbb{E}_q \left[ \ln \frac{q(z|x)}{p(z)} \right] - \mathbb{E}_q \left[ \ln p(x|z) \right] $$
+$$ ELBO =  \mathbb{E}_q \left[ \ln \frac{q(z \vert x)}{p(z)} \right] - \mathbb{E}_q \left[ \ln p(x \vert z) \right] $$
 
 **This is the ELBO you'll see in most places.** It's less intuitive, which is why I prefer the KL version.
 
 You can make this form more intuitive by rewriting the first term as KL divergence and the second term as a cross entropy:
 
-$$\begin{multline}
-ELBO =  \mathbb{E}_{x \sim q} \left[ D_{KL} ( q(z|x) \Vert p(z)) \right] \\
-  + \mathbb{E}_{z \sim q} \left[ CE(q(x|z),  p(x|z)) \right]
-\end{multline}$$
+$$\begin{alignat}{4}
+ELBO =&&  \mathbb{E}_{x \sim q} &\left[ D_{KL} ( q(z \vert x) \Vert p(z)) \right] & \\
+  && + \mathbb{E}_{z \sim q} &\left[ CE(q(x \vert z),  p(x \vert z)) \right] &
+\end{alignat}$$
 
-But you can't compute that cross entropy because we usually can't easily compute $q(x | z)$, so a nice balance is in
+But you can't compute that cross entropy because we usually can't easily compute $q(x \vert z)$, so a nice balance is in
 between:
 
-$$\begin{multline}
-ELBO =  \mathbb{E}_{x \sim q} \left[ D_{KL} ( q(z|x) \Vert p(z)) \right] \\
- - \mathbb{E}_q \left[ \ln p(x|z) \right] 
-\end{multline}$$
+$$\begin{alignat}{2}
+ELBO = \mathbb{E}_{x \sim q} & \left[ D_{KL} ( q(z \vert x) \Vert p(z)) \right] \\
+  - \mathbb{E}_q & \left[ \ln p(x \vert z) \right] 
+\end{alignat}$$
+
+It's critical to note that the ELBO is written conditional on our data $x$, meaning that it defines a per-datapoint loss
+function:
+
+$$\begin{alignat}{2}
+ELBO_i &= D_{KL} ( q(z \vert x_i) \Vert p(z)) - \mathbb{E}_{z \sim q(z \vert x_i)} \left[ \ln p(x_i \vert z) \right] \\
+ELBO &= \mathbb{E} \left[ ELBO_i \right]
+\end{alignat}$$
 
 # Why is it easier to model $(x, z)$ than to model $x$?
 
@@ -141,10 +153,12 @@ For example, you could cluster our toy data into two groups and then fit $p$ per
 **But you can also learn $q(z \vert x)$ and be safe knowing that minimizing the ELBO also bounds the loss on $x$.**
 
 In the toy example, we can model $p(x \vert z)$ as a gaussian and $p(z)$ as uniform, like before, and simultaneously
-model $q(z \vert x)$ as logistic `z ~ C(x)` (using the R/patsy model syntax, where `C` denotes a categorical variable).
+model $q(z \vert x)$ as $q(z=1 \vert x) = \sigma(a x)$ with a learned scalar $a$, leaving $q(z=0 \vert x) = 1-q(z=1 \vert x)$.
 Then we minimize the ELBO as a function of $q(z \vert x)$, $p(x \vert z)$, and $p(z)$ all at once.
 
-(gif of joint fitting)
+<video muted autoplay loop controls title="Fixed distribution x ~ q(x), learned distributions q(z|x) and p(x|z)">
+    <source src="{{ site.url }}/assets/vae/1/learned_qxz_learned_pxz_training.mp4" type="video/mp4">
+</video>
 
 We've chained together some incredibly simple models to make those simple models much more powerful.
 
