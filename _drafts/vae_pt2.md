@@ -12,102 +12,117 @@ We also showed that simple models of $p(x)$ can fall flat, but we can add latent
 more effective, building up to the evidence lower bound (ELBO) to show that fitting a model to the latent structure
 bounds the error on the original data.
 
-KL(x, z) >= KL(x)
+$$
+D_{KL}(q(x, z) \Vert p(x, z))
+\ge D_{KL}( q(x) \Vert p(x) )
+$$
+
+Rewriting this inequality, we can see that we minimize $D_{KL}( q(x) \Vert p(x) )$ by minimizing the ELBO:
+
+$$\begin{alignat}{2}
+ELBO_i = & D_{KL} ( q(z \vert x_i) \Vert p(z)) \\ 
+         & - \mathbb{E}_{z \sim q(z \vert x_i)} \left[ \ln p(x_i \vert z) \right] \\
+ELBO =   & \mathbb{E}_i \left[ ELBO_i \right]
+\end{alignat}$$
 
 ## This time
 
-This time, we'll look at how to add further structure to the latent model $p(z)$.
+We'll add structure on $x$ and $z$ and get a new ELBO.
 
-z is a bunch of variables:
+$$x' = (x, c)$$
 
-$$ z = a, b, c $$
+$$z' = (z_1, z_2, ...)$$
 
-We can model x and z as a big messy joint distribution $p(x, z) = p(x,a,b,c)$, or we can factor it as a bunch of conditional 
-probability distributions. For example:
+We'll say that $x$ is the part of $x'$ that we model as downstream of $z$ and $c$ is the part of $x'$ that we model
+as upstream of $z$.
 
-$$ p(x, z) = p(x, a,b,c) = p(x|a, b) p(a | c) p(b) p(c) $$
+We can write a new ELBO as
 
-This forms a graph, with each variable conditioned on its parents:
+$$\begin{alignat}{2}
+& D_{KL}(q(x', z') \Vert p(x', z')) \\
+&= D_{KL}(q(x, c, z) \Vert p(x, c, z)) \\
+&= \mathbb{E}_{(x, c, z) \sim q} \left[ \ln \frac{q(x, c, z)}{p(x, c, z)} \right] \\
+&= \mathbb{E}_{(x, c, z) \sim q} \left[ \ln \frac{q(z \vert x, c) q(x, c)}{p(x, z \vert c) p(c)} \right] \\
+&= \mathbb{E}_{(x, c, z) \sim q} \left[ \ln \frac{q(z \vert x, c) q(x, c)}{p(x \vert z, c) p(z \vert c) p(c)} \right] \\
+&= \mathbb{E}_{(x, c) \sim q} \left[ D_{KL} (q(z \vert x, c) \Vert p(z \vert c)) \right] - \mathbb{E}_{(x, c, z) \sim q} \left[ p(x \vert z, c) \right] - \mathbb{E}_{c \sim q} \left[ p(c) \right]- H(q(x, c)) \\
+\end{alignat}$$
 
-(graph here)
+$H(q(x, c))$ is fixed by the data. This gives us a conditional ELBO:
 
-# Toy example
+$$
+ELBO_i = D_{KL} (q(z \vert x_i, c_i) \Vert p(z \vert c_i))  - \mathbb{E}_{z \sim q} \left[ p(x_i \vert z, c_i) \right] - \mathbb{E}_{c \sim q} \left[ p(c) \right]
+$$
 
-We can extend the previous toy example to form a deeper hierarchy (you might be starting to notice
-that I'm building towards super-resolution models in later posts):
+Further, if $q(z \vert x, c)$ and $p(z \vert c)$ decompose with the same factorization (I think this requires that
+their moralizations/markov equivalents are the same. gotta double check the PGM book), then we can decompose the KL term
+in a straightforward way.
 
-(two-level clustering graph)
+That is, we're requiring a graphical structure such that, given the same mapping $\text{Pa}$ from variables to parents:
 
-$p(x, y, z) = p(x|y)p(y|z)p(z)$
+$$q(z \vert x, c) = \prod_{j \in Z} q(v_j \vert x, c, \text{Pa}(v_j))$$
 
-# more generally
+$$p(z \vert c) = \prod_{j \in Z} p(v_j \vert c, \text{Pa}(v_j))$$
 
-Denote the set of variables as $V = {x, a,b,c}$ and the set of variables in z as $Z = {a,b,c}$. 
+Then the KL terms decomposes as:
 
-Denote $\text{Pa(v)}$ as the set of parents of $v$ in the graph. For example, $\text{Pa(x)} = \{a,b\}$.
+$$\begin{alignat}{2}
+& D_{KL} (q(z \vert x_i, c_i) \Vert p(z \vert c_i)) \\
+&= \mathbb{E}_{z \sim q(\cdot \vert x_i, c_i)} \left[ \ln \frac{\prod_{j \in Z} q(v_j \vert x, c, \text{Pa}(v_j))}{\prod_{j \in Z} p(v_j \vert c, \text{Pa}(v_j))} \right] \\
+&= \sum_{j \in Z} \mathbb{E}_{z \sim q(\cdot \vert x_i, c_i)} \left[ \ln \frac{q(v_j \vert x_i, c_i, \text{Pa}(v_j))}{p(v_j \vert c_i, \text{Pa}(v_j))} \right] \\
+&= \sum_{j \in Z} \mathbb{E}_{z \sim q(\cdot \vert x_i, c_i)} \left[ \ln \frac{q(v_j \vert x_i, c_i, \text{Pa}(v_j))}{p(v_j \vert c_i, \text{Pa}(v_j))} \right] \\
+&= \sum_{j \in Z} \mathbb{E}_{\text{Pa}(v_j) \sim q(\cdot \vert x_i, c_i)} \left[ D_{KL} (q(v_j \vert x_i, c_i, \text{Pa}(v_j)) \Vert p(v_j \vert c_i, \text{Pa}(v_j))) \right]
+\end{alignat}$$
 
-We can now write the joint distribution as:
+If a variable $v_j$ has no parents, then $\text{Pa}(v_j) = \emptyset$ and the KL term is just the KL term for that variable.
 
-$$ p(x, z) = \prod_{v \in V} p(v \vert \text{Pa}(v)) $$
+We can now write the ELBO per variable, as:
 
-# The evidence lower bound
+$$\begin{alignat}{2}
+& ELBO_{i,j} \\
+&= - \mathbb{E}_{z \sim q(\cdot \vert x_i, c_i)} \left[ p(x_i \vert z, c_i) \right] && \text{ , if } v_j \text{ is } x \\
+&= - \mathbb{E}_{c \sim q} \left[ p(c_i) \right] && \text{ , if } v_j \text{ is } c \\
+&= D_{KL} (q(v_j \vert x_i, c_i) \Vert p(v_j \vert c_i)) && \text{ , if } v_j \text{ has no parents} \\
+&= \mathbb{E}_{\text{Pa}(v_j) \sim q(\cdot \vert x_i, c_i)} \left[ D_{KL} (q(v_j \vert x_i, c_i, \text{Pa}(v_j)) \Vert p(v_j \vert c_i, \text{Pa}(v_j))) \right] && \text{ , otherwise} \\
+\end{alignat}$$
 
-This lets us write a factored version of the ELBO
+Note that by "$v_j$ has no parents" we specifically mean that $q(v_j \vert x_i, c_i, \text{Pa}(v_j)) = q(v_j \vert x_i, c_i)$
+and $p(v_j \vert c_i, \text{Pa}(v_j)) = p(v_j \vert c_i)$, so it means that it has no parents in $q$,
+conditional on $x$ and $c$, and no parents in $p$, conditional on $c$, which is less restricting than just
+"has no parents at all."
 
-Recall my favorite form of the ELBO from the last post:
+This gives us a total ELBO:
 
-$$\begin{multline}
-ELBO =  \mathbb{E}_{x \sim q} \left[ D_{KL} ( q(z|x) \Vert p(z)) \right] \\
- - \mathbb{E}_q \left[ \ln p(x|z) \right] 
-\end{multline}$$
+$$ELBO = \sum_{i \in \text{Data}} \sum_{j \in \text{variables}} ELBO_{i,j}$$
 
-Rewriting the first term:
+For observed data $v = x$ and $v = c$, the ELBO is a cross entropy.
 
-$$\begin{align}
-& \mathbb{E}_{x \sim q} \left[ D_{KL} ( q(z|x) \Vert p(z)) \right] \\
-&= \mathbb{E}_{x \sim q} \left[ \mathbb{E}_{z \sim q(z|x)} \left[ \ln \frac{q(z|x)}{p(z)}\right]\right] \\
-&= \mathbb{E}_{x \sim q} \left[ \mathbb{E}_{z \sim q(z|x)} \left[ \ln \frac{\prod_{v \in Z} q(v \vert \text{Pa}(v), x)}{\prod_{v \in Z} p(v \vert \text{Pa}(v))}\right]\right] \\
-&= \mathbb{E}_{x \sim q} \left[ \mathbb{E}_{z \sim q(z|x)} \left[\sum_{v \in Z} \ln \frac{q(v \vert \text{Pa}(v), x)}{p(v \vert \text{Pa}(v))}\right]\right] \\
-&= \sum_{v \in Z} \mathbb{E}_{x \sim q} \left[ \mathbb{E}_{z \sim q(z|x)} \left[ \ln \frac{q(v \vert \text{Pa}(v), x)}{p(v \vert \text{Pa}(v))}\right]\right] \\
-&= \sum_{v \in Z} \mathbb{E}_{x \sim q} \left[ \mathbb{E}_{v, \text{Pa}(v) \sim q(v, \text{Pa}(v)|x)} \left[ \ln \frac{q(v \vert \text{Pa}(v), x)}{p(v \vert \text{Pa}(v))}\right]\right] \\
-&= \sum_{v \in Z} \mathbb{E}_{x \sim q} \left[ \mathbb{E}_{\text{Pa}(v) \sim q(\text{Pa}(v)|x)} \left[ D_{KL}(q(v \vert \text{Pa}(v), x) \Vert p(v \vert \text{Pa}(v))) \right]\right] \\
-&= \sum_{v \in Z} \mathbb{E}_{x, \text{Pa}(v) \sim q} \left[ D_{KL}(q(v \vert \text{Pa}(v), x) \Vert p(v \vert \text{Pa}(v))) \right] \\
-\end{align}$$
+For generated latent data $v \in z$, the ELBO is a KL divergence.
 
-We see that it's the sum of KL divergences of each part of the graph covering the latent variables, but also conditioned on
-$x$.
-
-We can rewrite the second term of the ELBO as well:
-
-$$\begin{align}
-& \mathbb{E}_q \left[ \ln p(x|z) \right] \\
-&= \mathbb{E}_q \left[ \ln p(x|\text{Pa}(x)) \right] \\
-&= \mathbb{E}_{x, \text{Pa}(x) \sim q} \left[ \ln p(x|\text{Pa}(x)) \right]
-\end{align}$$
-
-This gives us a factored form of the ELBO:
-
-$$\begin{multline}
-ELBO =  \\
-\sum_{v \in Z} \mathbb{E}_{x, \text{Pa}(v) \sim q} \left[ D_{KL}(q(v \vert \text{Pa}(v), x) \Vert p(v \vert \text{Pa}(v))) \right] \\
- - \mathbb{E}_{x, \text{Pa}(x) \sim q} \left[ \ln p(x|\text{Pa}(x)) \right] 
-\end{multline}$$
-
-**This tells us that we can decompose our model into a loss function into a bunch of smaller loss functions for each
-part of our model.**
+This splits the optimization problem into separate parts per variable, which is very convenient.
+It also allows us to limit any sampling to one variable at a time.
 
 ## Back to the toy model
 
-Applying this form of the ELBO to the toy model, we get
+Applying this form of the ELBO to the toy model and using the factorization we defined for $p$, we get
+
+$$\begin{alignat}{2}
+ELBO_{i,x} &= - \mathbb{E}_{z_1 \sim q(z_1 \vert x_i)} \left[ \ln p(x_i \vert z_1) \right] \\
+ELBO_{i,z_1} & = \mathbb{E}_{z_2 \sim q(z_2 \vert x_i)} \left[ D_{KL}(q(z_1 \vert z_2, x_i) \Vert p(z_1 \vert z_2)) \right] \\
+ELBO_{i,z_2} &= D_{KL}(q(z_2 \vert x_i) \Vert p(z_2)) \\
+\end{alignat}$$
+
  
 $$\begin{alignat}{3}
-& ELBO &&  \\
-&= && \sum_{v \in Z} \mathbb{E}_{x, \text{Pa}(v) \sim q} \left[ D_{KL}(q(v \vert \text{Pa}(v), x) \Vert p(v \vert \text{Pa}(v))) \right] \\
-& && - \mathbb{E}_{x, \text{Pa}(x) \sim q} \left[ \ln p(x|\text{Pa}(x)) \right] \\
-&= && \mathbb{E}_{x, y \sim q} \left[ D_{KL}(q(y \vert z, x) \Vert p(y \vert z)) \right] \\
-& && + \mathbb{E}_{x, z \sim q} \left[ D_{KL}(q(z \vert x) \Vert p(z)) \right] \\
-& && - \mathbb{E}_{x, y \sim q} \left[ \ln p(x|y) \right]
+& && ELBO_i   \\
+&= && ELBO_{i,x} + ELBO_{i,z_1} + ELBO_{i,z_2} \\
+&= && - \mathbb{E}_{z_1 \sim q(z_1 \vert x_i)} \left[ \ln p(x_i \vert z_1) \right] \\
+& && + \mathbb{E}_{z_2 \sim q(z_2 \vert x_i)} \left[ D_{KL}(q(z_1 \vert z_2, x_i) \Vert p(z_1 \vert z_2)) \right] \\
+& && + D_{KL}(q(z_2 \vert x_i) \Vert p(z_2)) \\
 \end{alignat}$$
+
+and finally
+
+$$ELBO = \sum_{i \in \text{Data}} ELBO_i$$
 
 Like last time, we can keep things simple. We will fit:
 - logistic models for $q(y \vert x)$ and $q(z \vert y)$

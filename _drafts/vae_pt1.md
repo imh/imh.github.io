@@ -30,7 +30,7 @@ model of it.
 As a toy model, let's say we have data distributed like this:
 
 {: .center}
-![Fixed distrubition x ~ q(x)]({{ site.url }}/assets/vae/1/qx.jpeg)
+![Fixed distrubition x ~ q(x)]({{ site.url }}/assets/vae/pt1/qx.jpeg)
 
 Variational inference is the process finding the best fitting model $ p(x) $ to some observed $ q(x) $, when the class of
 model distributions doesn't necessarily include the true distribution $ q(x) $.
@@ -41,7 +41,7 @@ $$ p(x) = \underset{p}{\text{argmin}} D_{KL}(q(x) \Vert p(x)) $$
 
 In the toy model, the true distribution clearly isn't gaussian, but we can find the best fitting gaussian:
 
-![Fixed distribution x ~ q(x) with estimated x ~ p(x)]({{ site.url }}/assets/vae/1/qx_learned_px.jpeg)
+![Fixed distribution x ~ q(x) with estimated x ~ p(x)]({{ site.url }}/assets/vae/pt1/qx_learned_px.jpeg)
 
 It's a terrible approximation. We're dramatically overestimating the support of the distribution and it's obvious that
 there's structure to be exploited.
@@ -50,12 +50,12 @@ there's structure to be exploited.
 
 A simple candidate to structure our model is two split it into two groups:
 
-![Fixed marginal distributions x ~ q(x) and z ~ q(z)]({{ site.url }}/assets/vae/1/fixed_qxz_unknown_joint.jpeg)
+![Fixed marginal distributions x ~ q(x) and z ~ q(z)]({{ site.url }}/assets/vae/pt1/fixed_qxz_unknown_joint.jpeg)
 
 Denoting the groups as $ z_1 $ and $ z_2 $, we're now trying to see which $ x $ and $ z $ go together.
 Ideally we learn a model that connects $ x $ and $ z $ like this, where the dashed lines denote $q(z_j \vert x_i)=1$:
 
-![Fixed distribution (x,z) ~ q(x, z)]({{ site.url }}/assets/vae/1/fixed_qxz.jpeg)
+![Fixed distribution (x,z) ~ q(x, z)]({{ site.url }}/assets/vae/pt1/fixed_qxz.jpeg)
 
 Let's assume we have $ q(z \vert x)$ figured out already (we'll come back to this), grouping the $x$ variables in the
 obvious way.
@@ -64,7 +64,7 @@ Then we have to build a model of $ p(x, z)$, which we'll factor as $ p(x \vert z
 
 The simplest candidates are $ p(z) = \text{uniform} $ and $ p(x \vert z) = \text{gaussian} $.
 
-![Fixed distribution (x,z) ~ q(x, z), learned distribution p(x\|z)]({{ site.url }}/assets/vae/1/fixed_qxz_learned_pxz.jpeg)
+![Fixed distribution (x,z) ~ q(x, z), learned distribution p(x\|z)]({{ site.url }}/assets/vae/pt1/fixed_qxz_learned_pxz.jpeg)
 
 This is a much better model. **We added a latent variable $z$ to represent the structure of the data, and now
 we can get away with a very simple model mapping latent $z$ back to observed $x$.**
@@ -131,8 +131,9 @@ It's critical to note that the ELBO is written conditional on our data $x$, mean
 function:
 
 $$\begin{alignat}{2}
-ELBO_i &= D_{KL} ( q(z \vert x_i) \Vert p(z)) - \mathbb{E}_{z \sim q(z \vert x_i)} \left[ \ln p(x_i \vert z) \right] \\
-ELBO &= \mathbb{E} \left[ ELBO_i \right]
+ELBO_i = & D_{KL} ( q(z \vert x_i) \Vert p(z)) \\ 
+         & - \mathbb{E}_{z \sim q(z \vert x_i)} \left[ \ln p(x_i \vert z) \right] \\
+ELBO =   & \mathbb{E}_i \left[ ELBO_i \right]
 \end{alignat}$$
 
 # Why is it easier to model $(x, z)$ than to model $x$?
@@ -157,7 +158,7 @@ model $q(z \vert x)$ as $q(z=1 \vert x) = \sigma(a x)$ with a learned scalar $a$
 Then we minimize the ELBO as a function of $q(z \vert x)$, $p(x \vert z)$, and $p(z)$ all at once.
 
 <video muted autoplay loop controls title="Fixed distribution x ~ q(x), learned distributions q(z|x) and p(x|z)">
-    <source src="{{ site.url }}/assets/vae/1/learned_qxz_learned_pxz_training.mp4" type="video/mp4">
+    <source src="{{ site.url }}/assets/vae/pt1/learned_qxz_learned_pxz_training.mp4" type="video/mp4">
 </video>
 
 We've chained together some incredibly simple models to make those simple models much more powerful.
