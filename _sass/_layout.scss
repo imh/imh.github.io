@@ -1,4 +1,16 @@
 /**
+ * Expand blocks
+ */
+.expand-button {
+//    underline the button text
+    text-decoration: underline;
+}
+details {
+    // draw a box around the block
+    border: 1px solid #838383;
+}
+
+/**
  * Site header
  */
 .site-header {

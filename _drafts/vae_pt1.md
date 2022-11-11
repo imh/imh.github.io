@@ -168,6 +168,11 @@ We've chained together some incredibly simple models to make those simple models
 Now we can sample from $ p(x) \approx q(x)$ by sampling from a pair of simple distributions. First we sample
 $ z ~ p(z) $, then we sample $ x ~ p(x \vert z) $.
 
+This gives us a marginal distrubution $p(x)$ that we can sample from with more expressivity than learning
+without a latent space $z$:
+
+![Marginal distribution (x) ~ q(x), learned distribution p(x)]({{ site.url }}/assets/vae/pt1/qx_learned_px_marginal.jpeg)
+
 # What's next?
 
 The flexibility of choices for the distributions $q(z \vert x)$, $p(x \vert z)$, and $p(z)$ provide room for creativity,
