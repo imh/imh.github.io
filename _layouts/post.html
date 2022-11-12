@@ -19,8 +19,10 @@ layout: default
     </div>
 
     {% endunless %}
-    {{ content | toc }}
-<!--    {{ content }}-->
+
+    {% include toc.html html=content %}
+
+    {{ content }}
   </div>
 
 </article>

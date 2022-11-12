@@ -16,8 +16,8 @@ baseurl: "" # the subpath of your site, e.g. /blog
 url: "http://imh.github.io" # the base hostname & protocol for your site
 github_username:  imh
 linkedin_username: ianhorn
-plugins:
-  - jekyll-toc
+#plugins:
+#  - jekyll-toc
 
 # Build settings
 markdown: kramdown
