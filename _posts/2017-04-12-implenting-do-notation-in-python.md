@@ -7,6 +7,8 @@ title: "Implementing Do Notation in Python"
 
 **disclaimer:** *This is all a really bad idea, but it was pretty fun to do. Hopefully I can teach people how to do equally horrible-yet-fun things. You should not actually use the decorator I built.*
 
+If you just want to see it in action, go to https://github.com/imh/python_do_notation. 
+
 Monads are a really useful as an abstraction, and a nice clean syntax goes a long way in making them pain-free to use.
 In Haskell, that's `do` notation.
 Scala has a similar `for` notation.

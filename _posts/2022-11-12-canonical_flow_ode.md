@@ -1,10 +1,37 @@
 ---
 layout: post
-title: "Canonical flow ODE"
+title: "[WIP] Canonical probability flow ODE"
 toc: true
 ---
 
-Karras et al have a nicer version of Song's probability flow ODE, but it can be made even clearer.
+\[**Under construction. If you see this it's probably because I shared it directly with you.**\]
+
+# tl;dr
+
+Karras et al have a nicer version of Song's probability flow ODE, but it can be made even clearer
+
+(to do: figure out how
+jekyll and bibtex work together).
+
+Specifically, it reduces to (without loss of generality, I think):
+
+$$\dot{x} = x - \mathbb{E}_{x_0 \sim p(x_0 \vert x; t)} \left[ x_0 \right] =: x - m(x; t)$$
+
+where $m(x; t)$ is the average initial value of the diffusion process given $x_t$.
+
+It has a really nice Jacobian too:
+
+$ \nabla \dot{x} = I  - \frac{1}{\sigma^2} \mathbb{V}_{x_0 \sim p(x_0 \vert x; t)} \left[ \nu \right] $
+
+where $\nu(x_0, x, t) = x_0 - m(x; t)$.
+
+Higher order derivatives are also super simple (see below.)
+
+Lastly, this makes it really clear what behavior is as $t \to 0$ and $t \to \infty$, because we can look at what happens
+to $m$ as $t \to 0$ and $t \to \infty$. (e.g. $m \to \mathbb{E}[x_0]$ as $t \to \infty$.)
+
+# Derivation
+
 
 It's useful because sets of trajectories that follow this ODE preserve marginal distributions. That is, if you sample
 $x \sim p(x_0)$ and integrate either the ODE or the SDE, you'll end up with $p(x_t)$ the same either way. You can also
@@ -91,14 +118,20 @@ $$
 We can define a new time term $t'$ such that $dt'/dt = \frac{d}{d t} \ln \sigma$ and get what I'd
 consider a pretty fundamental form of the diffusion ODE.
 
+# The "canonical" form
+
 $$\dot{x} = x - \mathbb{E}_{x_0 \sim p(x_0 \vert x; t)} \left[ x_0 \right] =: x - m(x; t)$$
 
-It must be a standard result, but I haven't seen it before.
+It has to be a standard result, but I haven't seen it before.
 
 At any given point in time, the paths must be directly towards or away from the (average) place they started.
 You can change time around to rescale things however, but these tangent vectors are independent of parametrization.
 
-$m(x; t)$ also has some convenient properties.
+# Derivatives and stability
+
+It turns out that $m(x; t)$ has really straightforward derivatives, letting us look at the ODE's properties fairly easily.
+
+## Derivatives
 
 First, let's invert $\nabla \ln p(x_0 \vert x; t)$ with Bayes rule.
 
@@ -216,6 +249,9 @@ The jacobian is straightforward as $ I  - \frac{1}{\sigma^2} \mathbb{V}_{x_0 \si
 
 To look at stability, we might as well scale it by $-\sigma^2$ (time reversal to reverse diffusion) to get $ \mathbb{V}_{x_0 \sim p(x_0 \vert x'; t)} \left[ \nu \right] - \sigma^2 I $.
 
+
+## Stability
+
 The eigendecomposition tells us a few things, if I remember correctly:
 
 - Which axes are stable/unstable?
@@ -230,19 +266,27 @@ So a bunch of distributions with overall zero mean and identity covariance.
 
 Maybe some nice toy models would be
 
-- A multivariate standard normal.
+- A multivariate gaussian.
 
-- Two degenerate gaussians parallel with each other
+- The uniform distribution on a ellipsoidal shell
 
-- The uniform distribution on a spherical shell
+- points around the shell of an ellipsoid
 
-- N degenerate gaussians perpendicular to each other (in dimension N).
+- - Two degenerate gaussians parallel with each other
 
-- points around the shell of a sphere
+- Two degenerate gaussians that intersect
+
+## Limits
+
+to-do: limits for those toy models
+
+# Extensions
+
 
 Other interesting things to look at would be how this generalizes to non-gaussian noise. Are there useful analogies
-in the whole exponential family? $\nabla ln p$ is relatively straightforward for them. What's the diffusion process
-to make an ODE out of? If Dirichlet has a useful one analog, then this could noise and denoise categories in a way
+in the whole exponential family? Maybe following Karras's idea of using the marginals as first class citizens could extend
+to exponential family marginals?  $\nabla ln p$ is relatively straightforward for them. What's the diffusion process
+to make an ODE out of? If Dirichlet has a useful  analog, then this could noise and denoise categories in a way
 that handles branching through bifurcations rather than autoregressive sampling like typical language models.
 
 

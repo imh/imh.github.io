@@ -1,8 +1,12 @@
 ---
 layout: post
-title: "Assorted score model/diffusion identities"
+title: "Random handy probability gradient properties"
 toc: true
 ---
+
+Some random handy stuff to keep accessible for later.
+
+# Gradient of log probability under bayes rule
 
 Score model for gaussian noise:
 
@@ -10,10 +14,7 @@ Score modeling gets around learning the normalizing constant in $p(x) = f(x)/Z$ 
 probability: $\nabla \log p(x) = \nabla \log f(x)$.
 
 In a denoising model, we have $x_0$ and $x_t$, where $x_0$ is the observed data and $x_t$ is determined by a design
-choice: $p(x \vert x_0, t) $.
-
-# Gradient of log probability
-
+choice: $p(x \vert x_0, t) $. It's important to be able to differentiate that.
 
 $$\nabla \ln p(x \vert t) = \mathbb{E}_{x_0 \vert x, t} \left[ \nabla \ln \left(p(x \vert x_0, t) \right) \right]$$
 
@@ -46,6 +47,9 @@ $$\nabla_{z_i} \ln p(z_i) = \mathbb{E}_{x \vert z_i} \left[ \nabla \ln \left(p(z
 
 # Gradient of log conditional probability
 
+Inverting the probability under bayes rule, we get an awkward expectation. To differeentiate that, we need to differentiate
+the corresponding conditional distribution:
+
 $$\nabla \ln p(x_0 \vert x; t) =  \nabla \ln p(x \vert x_0; t) - \mathbb{E}_{x_0 \sim p(x_0 \vert x; t)} \left[ \nabla \ln p(x \vert x_0, t) \right] $$
 
 <details>
@@ -72,6 +76,8 @@ $$\begin{alignat}{2}
 </details>
 
 # Gradient of conditional expectations
+
+That lets us take gradients of expecations like the bayes-rule one:
 
 $$\begin{alignat}{2}
 
