@@ -13,7 +13,7 @@ Karras et al have a nicer version of Song's probability flow ODE, but it can be 
 (to do: figure out how
 jekyll and bibtex work together).
 
-Specifically, it reduces to (without loss of generality, I think):
+Specifically, it reduces to (without loss of generality, up to a straightforward reparametrization):
 
 $$\dot{x} = x - \mathbb{E}_{x_0 \sim p(x_0 \vert x; t)} \left[ x_0 \right] =: x - m(x; t)$$
 
