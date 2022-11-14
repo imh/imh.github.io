@@ -229,10 +229,10 @@ We can contract that in a particular direction to get the taylor expansion of $m
 $$\begin{alignat}{2}
 
 m_i(x; t)
-= & \sum_i \frac{1}{\sigma^{2 n}} \mathbb{E}_{x_0 \sim p(x_0 \vert x; t)} \left[ \nu_{j_1} \nu_{j_2} ...  \nu_{j_n}  \nu_i \right] \Delta x_{j_1} \Delta x_{j_2} ... \Delta x_{j_n} \\
-= & \sum_i \frac{1}{\sigma^{2 n}} \mathbb{E}_{x_0 \sim p(x_0 \vert x; t)} \left[ (\nu_{j_1} \Delta x_{j_1}) (\nu_{j_2} \Delta x_{j_2}) ...  (\nu_{j_n} \Delta x_{j_n}) \nu_i \right] \\
-= & \sum_i \frac{1}{\sigma^{2 n}} \mathbb{E}_{x_0 \sim p(x_0 \vert x; t)} \left[ (\nu \cdot \Delta x)^n \nu_i \right] \\
-= & \sum_i \frac{1}{\sigma^{2 n}} \mathbb{E}_{x_0 \sim p(x_0 \vert x; t)} \left[ \Vert \nu \Vert^n \Vert \Delta x \Vert^n \cos^n \left(\theta_{\nu, \Delta x} \right) \nu_i \right] \\
+= & \sum_n \frac{1}{\sigma^{2 n}} \mathbb{E}_{x_0 \sim p(x_0 \vert x; t)} \left[ \nu_{j_1} \nu_{j_2} ...  \nu_{j_n}  \nu_i \right] \Delta x_{j_1} \Delta x_{j_2} ... \Delta x_{j_n} \\
+= & \sum_n \frac{1}{\sigma^{2 n}} \mathbb{E}_{x_0 \sim p(x_0 \vert x; t)} \left[ (\nu_{j_1} \Delta x_{j_1}) (\nu_{j_2} \Delta x_{j_2}) ...  (\nu_{j_n} \Delta x_{j_n}) \nu_i \right] \\
+= & \sum_n \frac{1}{\sigma^{2 n}} \mathbb{E}_{x_0 \sim p(x_0 \vert x; t)} \left[ (\nu \cdot \Delta x)^n \nu_i \right] \\
+= & \sum_n \frac{1}{\sigma^{2 n}} \mathbb{E}_{x_0 \sim p(x_0 \vert x; t)} \left[ \Vert \nu \Vert^n \Vert \Delta x \Vert^n \cos^n \left(\theta_{\nu, \Delta x} \right) \nu_i \right] \\
 \end{alignat}$$
 
 Going back to single-order derivatives, we linearize the ODE:
